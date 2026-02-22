@@ -1,0 +1,7 @@
+INDEX VERSION 1.4+/home/alaz/eclipse-workspace2/.metadata/.plugins/org.eclipse.wst.jsdt.core/indexes
+133585783.index
+4233599075.index
+3302058560.index
+2520422563.index
+367185221.index
+4211684026.index

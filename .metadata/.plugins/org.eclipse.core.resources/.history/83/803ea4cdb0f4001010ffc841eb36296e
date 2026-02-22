@@ -1,0 +1,69 @@
+
+version: '3.8'
+
+services:
+  # Tomcat with your web application
+  tomcat:
+    image: tomcat:11.0-jdk21-temurin
+    container_name: escaperoom-tomcat
+    ports:
+      - "8080:8080"  # Maps to localhost:8082
+    volumes:
+      # Mount your JSP/static files
+      - ~/APtest/eclipse/EscapeRoom.war:/usr/local/tomcat/webapps/EscapeRoom.war
+      - ./build:/usr/local/tomcat/build
+      - /var/run/docker.sock:/var/run/docker.sock  # Docker socket
+      - /usr/bin/docker:/usr/bin/docker:ro  
+      # Mount compiled classes (built by Eclipse)
+#      - ./src/main/:/usr/local/tomcat/
+#        ./build/classes/EscapeRoom/:/usr/local/tomcat/build/classes/EscapeRoom/
+#		
+#      # For hot deployment of libs
+#      - ./src/main/webapp/WEB-INF/lib:/usr/local/tomcat/webapps/EscapeRoom/WEB-INF/lib
+    environment:
+      - JAVA_OPTS=-Xmx512m -Xms256m -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:8000
+      - CATALINA_OPTS=-Djava.security.egd=file:/dev/./urandom
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - escaperoom-network
+    privileged: true
+    command: >
+        sh -c "
+          # Install docker CLI if not present
+          apt install -y docker.io &&
+          # Wait for Docker socket to be created
+          docker --version &&
+          # Start Tomcat (the default command)
+          catalina.sh run
+        "
+
+  # MySQL database
+  mysql:
+    image: mysql:8.0
+    container_name: escape-mysql
+    ports:
+      - "3307:3306"  # Different port to avoid conflicts with local MySQL
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: escaperoom_db
+      MYSQL_USER: escaperoom_user
+      MYSQL_PASSWORD: escaperoom_pass
+    volumes:
+      - mysql-data:/var/lib/mysql
+
+    networks:
+      - escaperoom-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-prootpassword"]
+      timeout: 20s
+      retries: 10
+      start_period: 30s
+
+volumes:
+  mysql-data:
+
+networks:
+  escaperoom-network:
+    driver: bridge

@@ -1,0 +1,7 @@
+127.0.0.1 - - [18/Jan/2026:11:45:08 -0500] "GET / HTTP/1.1" 404 751
+127.0.0.1 - - [18/Jan/2026:11:46:06 -0500] "POST /EscapeRoom/compile HTTP/1.1" 200 4480
+127.0.0.1 - - [18/Jan/2026:11:46:41 -0500] "POST /EscapeRoom/compile HTTP/1.1" 200 4480
+127.0.0.1 - - [18/Jan/2026:11:46:52 -0500] "GET /EscapeRoom/test HTTP/1.1" 404 770
+127.0.0.1 - - [18/Jan/2026:11:48:10 -0500] "GET /EscapeRoom/ HTTP/1.1" 200 5615
+127.0.0.1 - - [18/Jan/2026:11:48:24 -0500] "GET /EscapeRoom/register HTTP/1.1" 200 3853
+127.0.0.1 - - [18/Jan/2026:11:49:07 -0500] "POST /EscapeRoom/register HTTP/1.1" 200 5615

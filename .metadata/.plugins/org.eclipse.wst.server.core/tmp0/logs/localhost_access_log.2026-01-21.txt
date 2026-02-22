@@ -1,0 +1,11 @@
+127.0.0.1 - - [21/Jan/2026:06:23:52 -0500] "GET / HTTP/1.1" 404 751
+127.0.0.1 - - [21/Jan/2026:06:27:14 -0500] "GET / HTTP/1.1" 404 751
+127.0.0.1 - - [21/Jan/2026:06:27:29 -0500] "GET /EscapeRoom/ HTTP/1.1" 200 5615
+127.0.0.1 - - [21/Jan/2026:06:27:36 -0500] "GET /EscapeRoom/online.jsp HTTP/1.1" 200 4476
+127.0.0.1 - - [21/Jan/2026:06:28:05 -0500] "POST /EscapeRoom/compile HTTP/1.1" 200 4480
+127.0.0.1 - - [21/Jan/2026:06:28:10 -0500] "POST /EscapeRoom/compile HTTP/1.1" 200 4480
+127.0.0.1 - - [21/Jan/2026:06:28:23 -0500] "POST /EscapeRoom/compile HTTP/1.1" 200 4480
+127.0.0.1 - - [21/Jan/2026:15:25:28 -0500] "GET / HTTP/1.1" 404 751
+127.0.0.1 - - [21/Jan/2026:15:26:07 -0500] "POST /EscapeRoom/compile HTTP/1.1" 200 4353
+127.0.0.1 - - [21/Jan/2026:15:26:08 -0500] "GET /EscapeRoom/compile HTTP/1.1" 200 4476
+127.0.0.1 - - [21/Jan/2026:15:26:53 -0500] "POST /EscapeRoom/compile HTTP/1.1" 200 4351

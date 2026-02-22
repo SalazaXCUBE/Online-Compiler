@@ -1,0 +1,183 @@
+package EscapeRoom.container;
+
+import jakarta.servlet.ServletException;
+
+import jakarta.servlet.*;
+import jakarta.servlet.RequestDispatcher;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.*;
+import java.nio.file.*;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
+import javax.servlet.*;
+import javax.servlet.http.*;
+
+import org.apache.el.util.Validation;
+
+import javax.servlet.annotation.*;
+
+/**
+ * Servlet implementation class room
+ */
+@WebServlet("/compile")
+public class CompilerServlet extends HttpServlet {
+	
+	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		// TODO Auto-generated method stub
+		//response.getWriter().append("Served at: ").append(request.getContextPath());
+		System.out.println("=== TEST SERVLET CALLED ===");
+        System.out.println("Time: " + new java.util.Date());
+		RequestDispatcher dispatch = request.getRequestDispatcher("online.jsp");
+		dispatch.forward(request, response);
+	}
+    
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) 
+            throws ServletException, IOException {
+        
+        //resp.setContentType("text/plain");
+        //PrintWriter out = resp.getWriter();
+    	System.out.println("=== TEST SERVLET CALLED ===");
+        System.out.println("Time: " + new java.util.Date());
+        String language = req.getParameter("language");
+        
+        String code = req.getParameter("code");
+        
+        try {
+            String output = executeCode(language, code);
+            try {
+                sanitize(code);
+                
+            } catch (Exception e) {
+                output = "Security error: " + e.getMessage();
+            }
+
+            req.setAttribute("output", output);
+            //resp.getWriter().append(output);
+            System.out.println(output);
+        } catch (Exception e) {
+            //out.println("Error:onw " + e.getMessage());
+        	req.setAttribute("output", "not compiling");
+            //resp.sendError(400, e.getMessage());
+            //resp.getWriter().append("idk the bug: ").append(req.getContextPath());
+    		
+        }
+        //req.setAttribute("output", output);
+        req.setAttribute("code", code);
+        req.setAttribute("language", language);
+
+        RequestDispatcher rd = req.getRequestDispatcher("online.jsp");
+        rd.forward(req, resp);
+    }
+    
+    private String executeCode(String language, String code)
+            throws IOException, InterruptedException {
+
+        Map<String, String> images = new HashMap<>();
+        images.put("java", "eclipse-temurin:17-jdk");
+
+        images.put("python", "python:3.9-slim");
+        images.put("javascript", "node:18-alpine");
+
+        File tempDir = Files.createTempDirectory("code").toFile();
+        String filename = getFilename(language);
+        File codeFile = new File(tempDir, filename);
+        Files.write(codeFile.toPath(), code.getBytes());
+
+        String[] cmd = {
+            "docker", "run", "--rm",
+            "-v", tempDir.getAbsolutePath() + ":/app",
+            "-v", "/var/run/docker.sock:/var/run/docker.sock",
+            "--privileged",
+            "--memory", "256m",
+            "--network", "bridge",
+            images.get(language),
+            "sh", "-c", getExecutionCommand(language, filename)
+        };
+
+        Process process = new ProcessBuilder(cmd).start();
+
+        boolean finished = process.waitFor(200, TimeUnit.SECONDS);
+        if (!finished) {
+            process.destroyForcibly();
+            return " Execution timed out";
+        }
+
+        StringBuilder output = new StringBuilder();
+        String line;
+
+        
+        BufferedReader stdout = new BufferedReader(
+                new InputStreamReader(process.getInputStream()));
+        while ((line = stdout.readLine()) != null) {
+            output.append(line).append("\n");
+        }
+
+   
+        BufferedReader stderr = new BufferedReader(
+                new InputStreamReader(process.getErrorStream()));
+        while ((line = stderr.readLine()) != null) {
+            output.append("ERROR: ").append(line).append("\n");
+        }
+
+        int exitCode = process.exitValue();
+        
+
+        if (output.length() == 0) {
+            return exitCode == 0
+                    ? "Program finished with no output."
+                    : "Program failed with exit code " + exitCode;
+        }
+
+        return output.toString();
+    }
+
+    
+    private String getExecutionCommand(String language, String filename) {
+        switch (language) {
+            case "java":
+                return "cd /app && javac " + filename + 
+                       " && java " + filename.replace(".java", "");
+            case "python":
+                return "python /app/" + filename;
+            case "javascript":
+                return "node /app/" + filename;
+            default:
+                return "echo 'Unsupported language'";
+        }
+    }
+    private String getFilename(String language) {
+        if ("java".equals(language)) {
+            return "Main.java";
+        } else if ("python".equals(language)) {
+            return "main.py";
+        } else if ("javascript".equals(language)) {
+            return "script.js";
+        } else if ("c".equals(language)) {
+            return "program.c";
+        } else if ("cpp".equals(language)) {
+            return "program.cpp";
+        }
+        return "code.txt";
+    }
+    private void sanitize(String code) throws Exception {
+    	final String[] FORBIDDEN = {
+    		    
+    		    "subprocess"
+    		};
+
+        String lower = code.toLowerCase();
+
+        for (String keyword : FORBIDDEN) {
+            if (lower.contains(keyword)) {
+                throw new Exception(
+                    "Use of forbidden keyword detected: " + keyword
+                );
+            }
+        }
+    }
+
+}
