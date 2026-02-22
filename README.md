@@ -12,10 +12,13 @@ Web application that safely executes user code in isolated Docker containers. Us
 
 ### Deploy
 git clone https://github.com/SalazaXCUBE/Online-Compiler.git
+
 cd EscapeRoom/
+
 docker-compose
+
 Access
-http://localhost:8080/online/
+http://localhost:8080/EscapeRoom/compile
 
 Usage
 1. Select language (Java/Python/JavaScript)
